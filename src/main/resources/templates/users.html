@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> -->
+<meta name="description" content="">
+<meta name="author" content="">
+<title>아세아제지 제품출고현황</title>
+
+<!-- Bootstrap core CSS -->
+<link rel="icon" th:href="@{image/icon.ico}">
+<link th:href="@{css/sb-admin-2.min.css}" rel="stylesheet" type="text/css">
+<link th:href="@{css/bootstrap-4.0.0/dist/css/bootstrap.min.css}" rel="stylesheet" type="text/css">
+<!-- Custom styles for this template -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link th:href="@{css/bootstrap-4.0.0/docs/4.0/examples/dashboard/dashboard.css}" rel="stylesheet" type="text/css">
+<link th:href="@{css/users.css}" rel="stylesheet" type="text/css">
+</head>
+
+<body id="mainBody" onload="scrollLoad();" onscroll="setScrollPosition();">
+	<input type="hidden" id="clickedList" value="">
+	<input type="hidden" id="scrollYN" th:value="${scrollYN}">
+	<nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0" style="z-index: 150;position: sticky">
+		<a class="navbar-brand col-xs-2" href="/main.do">
+			<img alt="" src="image\150px_logo_hor_white.png">
+		</a>
+		<ul class="navbar-nav px-3">
+			<li class="nav-item text-nowrap">
+				<a class="nav-link" href="/logout">Sign out</a>
+			</li>
+		</ul>
+	</nav>
+
+	<div class="container-fluid" style="width:100%; margin: 0px;">
+		<div class="row">
+			<nav class="col-xs-2 bg-light sidebar" style="padding-top: 63px;width: 200px !important; height: auto;">
+				<div class="sidebar-sticky" style="">
+					<ul class="nav flex-column">
+						<li class="nav-item" style="padding: 12px 0;">
+							<a class="nav-link2" href="/board.do"> 
+								<span data-feather="info"></span> 공지사항
+							</a>
+						</li>
+						<li class="nav-item" style="padding: 12px 0;">
+							<a class="nav-link2" href="/main.do"> 
+								<span data-feather="truck"></span> 출고현황
+							</a>
+						</li>
+						<li class="nav-item" style="padding: 12px 0;">
+							<a class="nav-link2" href="/password.do"> 
+								<span data-feather="user"></span> 개인정보
+							</a>
+						</li>
+						<li class="nav-item" style="padding: 12px 0;" sec:authorize="hasRole('ROLE_ADMIN')">
+							<a class="nav-link2 active" href="/users.do"> 
+								<span data-feather="users"></span> 유저관리
+							</a>
+						</li>
+					</ul>
+				</div>
+			</nav>
+			<main role="main" class="col-xs-9 ml-sm-auto col-xs-10 pt-3 px-4" style="width:100%; margin-left: 200px !important;">
+			<h1 class="h3 mb-2 text-gray-800">유저관리</h1>
+			<p class="mb-4"></p>
+				<div class="card shadow xs-4">
+					<div class="card-header py-3">
+		              <h6 class="m-0 font-weight-bold text-primary">새 유저 추가</h6>
+		            </div>
+		            <div class="card-body">
+		            	<input type="radio" id="userRadio" name="TYPE" value="USER" checked="checked" onclick="javascript:clickTypeRadio(0)">
+		            	<label for="userRadio" style="margin-right: 20px;">사용자</label>
+		            	<input type="radio" id="adminRadio" name="TYPE" value="ADMIN"  onclick="javascript:clickTypeRadio(1)">
+		            	<label for="adminRadio">관리자</label>
+		            	<table class="table table-bordered col-md-10" id="userInsertTable" >
+		        			<tr>
+		        				<th width="150px">거래처조회</th>
+		        				<td width="150px" style="border-right-color: white;">
+		        					<input type="text" id="custNm" class="form-control" style="margin-right: 10px;width: 100%; min-width: 150px;" onkeydown="enterBtn();">
+		        				</td>
+		        				<td width="100px">
+		        					<button type="button" class="form-control" style="width: 100%;" id="custBtn" onclick="javascript:clickCustBtn();">조회</button>
+		        				</td>
+		        				<th width="150px">거래처선택</th>
+		        				<td>
+		        					<select class="form-control" id="selectCust" 
+		        						    style="width: 100%; min-width: 150px; height: 26px;" onchange="javascript:selectCustOpen()">
+		        						<option id="baseOption" value="999999/관리자/">거래처 선택</option>
+		        					</select>
+		        				</td>
+		        			</tr>
+		        			<tr>
+		        				<th>아이디</th>
+		        				<td colspan="2"><input type="text" class="form-control" id="custID" name="ID" style="width: 100%;"></td>
+		        				<th>비밀번호</th>
+		        				<td><input type="text" class="form-control" id="custPasswd" name="PWD" style="width: 100%;"></td>
+		        			</tr>
+		        		</table>
+		        		<button class="form-control" onclick="javascript:addCust()" style="width:300px;height:36px;font-weight:bold; font-size: 16px; margin: 0 auto;">
+		        			신규등록
+		        		</button>
+		            </div>
+				</div>
+				<div style="height: 20px;"> </div>
+				<div class="card shadow xs-4">
+					<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+						<h6 class="m-0 font-weight-bold text-primary">유저정보</h6>
+					</div>
+					<div class="card-body">
+						<div class="d-sm-flex align-items-center justify-content-between mb-4">
+						</div>
+						<table class="table table-striped table-bordered table-sm" id="usersTable">
+								<thead>
+									<tr>
+										<th width="40px" class="mainTable_th">번호</th>
+										<th class="mainTable_th">아이디</th>
+										<th class="mainTable_th">거래처코드</th>
+										<th class="mainTable_th">거래처명</th>
+										<th class="mainTable_th">사업자번호</th>
+										<th class="mainTable_th">로그인횟수</th>
+										<th class="mainTable_th">로그</th>
+										<th class="mainTable_th">사용여부</th>
+										<th class="mainTable_th">사용자등급</th>
+										<th class="mainTable_th">관리</th>
+									</tr>
+								</thead>
+								<tbody id="users_tbody">
+									<tr class="usersTable_tr" th:each="list, iterState : ${data}">
+										<td th:text="${iterState.count}" style="text-align: right;"></td>
+										<td th:text="${list.ID}"></td>
+										<td th:text="${list.CUST_CODE}"></td>
+										<td th:text="${list.CUST_NM}" style="text-align: left;"></td>
+										<td th:text="${list.BZ_REG_NO} "></td>
+										<td style="text-align: right;">
+											<span th:text="${list.CHK_PWD}"></span>
+											<img class="refreshButton" src="image\30px_refresh_button.jpg" th:attr="onclick=|javascript:refreshCount('${list.ID}');|">
+										</td>
+										<td>
+											<button class="form-control" 
+													type="button" 
+													th:text="로그"
+													th:attr="onclick=|javascript:openLoginLog(900,860,'${list.CUST_CODE}');|"></button>
+										</td>
+										<td style="text-align: center;">
+											<!-- <select 
+												name="stopStatus" 
+												th:style="(${list.STOP} == 'N' ? 'color:green;' : 'color:red;') + ('font-weight: bold;')"
+												th:attr="onchange=|javascript:changeSelect('${list.ID}');|"
+												>
+												<option 
+													th:value="N" 
+													th:text="허용"
+													th:selected="${list.STOP} == 'N'"
+													></option>
+												<option 
+													th:value="Y" 
+													th:text="중지"
+													th:selected="${list.STOP} == 'Y'"
+													></option>
+											</select> -->
+											<button class="form-control" 
+													type="button" 
+													th:style="(${list.STOP} == 'N' ? 'color:green;' : 'color:red;') + ('font-size:14px;font-weight: bold;')"
+													th:text="(${list.STOP} == 'N' ? '허용' : '중지')"
+													th:attr="onclick=|javascript:changeStop('${list.ID}');|"></button>
+										</td>
+										<td style="text-align: center;">
+											<!-- <select name="typeStatus">
+												<option 
+													th:value="ADMIN" 
+													th:text="관리자"
+													th:selected="${list.TYPE} == 'ADMIN'"
+													></option>
+												<option 
+													th:value="USER" 
+													th:text="사용자"
+													th:selected="${list.TYPE} == 'USER'"
+													></option>
+											</select> -->
+											<button class="form-control" 
+													type="button" 
+													th:style="(${list.TYPE} == 'ADMIN' ? 'color:red;' : 'color:green;') + ('font-size:14px;font-weight: bold;')",
+													th:text="(${list.TYPE} == 'ADMIN' ? '관리자' : '사용자')"
+													th:attr="onclick=|javascript:changeType('${list.ID}');|"></button>
+										</td>
+										<td style="padding: 0px;">
+											<button class="form-control" type="button" th:attr="onclick=|javascript:deleteCustBtn('${list.ID}');|">삭제</button>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+					</div>
+				</div>
+			</main>
+		</div>
+	</div>
+	<!-- jquery -->
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<!-- Bootstrap core JavaScript
+    ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script th:src="@{css/bootstrap-4.0.0/assets/js/vendor/popper.min.js}"></script>
+	<script th:src="@{css/bootstrap-4.0.0/dist/js/bootstrap.min.js}"></script>
+
+	<!-- Icons -->
+	<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+	<script>
+      feather.replace()
+    </script>
+    <script type="text/javascript">
+    	function scrollLoad(){
+    		var scrollYN = document.getElementById("scrollYN").value;
+    		if(scrollYN == "Y"){
+    			var strCook = document.cookie;
+        		if(strCook.indexOf("!~")!=0) { 
+        			var intS = strCook.indexOf("!~"); 
+        			var intE = strCook.indexOf("~!"); 
+        			var strPos = strCook.substring(intS+2,intE); 
+        			document.documentElement.scrollTop = strPos; 
+        		}
+    		} else {
+    			document.documentElement.scrollTop = 0;
+    		}
+    	}
+    	function setScrollPosition(){
+    		var intY = document.documentElement.scrollTop; 
+	  		document.cookie = "yPos=!~" + intY + "~!";
+    	}
+	  	function refreshCount(ID){
+	  		if (confirm("해당 거래처의 로그인 횟수를 0으로 초기화합니다. 계속하시겠습니까?")){
+	  			location.href="/updateUserPwdCount.do?ID="+ID;
+	  		}
+	  	}
+	  	function addCust(){
+	  		var radioType = document.getElementsByName("TYPE");
+	  		var selectCust = document.getElementById("selectCust").value;
+	  	
+	  		if(radioType[0].checked && document.getElementById("selectCust").innerText == "거래처 선택"){
+				alert("거래처를 선택하세요.");
+				return 0;
+			}
+	  		
+	  		if(document.getElementById("custID").value == "" || document.getElementById("custPasswd").value == ""){
+				alert("아이디와 비밀번호를 모두 입력하세요.");
+			} else {
+				var custid = document.getElementById("custID").value;
+				var custPasswd = document.getElementById("custPasswd").value;
+				
+				if(custid.length < 6){
+					alert("아이디는 6자 이상으로 만들어야 합니다.");
+					return 0;
+				}
+				
+				var mt = document.getElementById("usersTable");
+				var rowlen = mt.rows.length;
+				var i = 0;
+				for(i = 1 ; i < rowlen ; i++){
+					if(mt.rows[i].cells[1].innerHTML == custid){
+						alert("이미 존재하는 아이디입니다.");
+						break;
+					}
+				}
+				if(i == rowlen){
+					if(confirm("등록하시겠습니까?")){
+						var type = "/";
+						
+						if(radioType[0].checked)
+							type += "USER";
+						else
+							type += "ADMIN";
+						
+						selectCust += type;
+						location.href="/insertUser.do?ID="+custid+"&PWD="+custPasswd+"&selectCust="+encodeURIComponent(selectCust);
+					}	
+				}
+			}
+	  	}
+	  	function enterBtn(){
+	  		if(event.keyCode == 13)
+	  	     {
+	  			clickCustBtn();
+	  	     }
+	  	}
+	  	function clickCustBtn(){
+	  		var custNm  = document.getElementById("custNm").value;
+	  		if(custNm){
+	  			$.ajax({
+                    type:"POST",
+                    url:"/custSelect.do",
+                    data: {CUST_NM : custNm},
+                    success: function(t){
+                    	$("option[name=appendOption]").remove();
+                    	for(var i in t) {
+                    		var custCode = t[i].cust_CODE;
+                    		var cust_Nm = t[i].cust_NM;
+                    		var bzRegNo = t[i].bz_REG_NO;
+                    		var option = "<option name='appendOption' value='"+custCode+"/"+cust_Nm+"/"+bzRegNo+"'>("+custCode+")"+cust_Nm+"</option>";
+                    		$('#selectCust').append(option);
+                    	}
+                    },
+                    error: function(request, status, error) {
+                        alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+                    }  
+                });
+	  		} else {
+	  			alert("거래처명을 입력하세요.");
+	  		}
+	  		
+	  	}
+	  	function selectCustOpen(){
+	  		var custID = document.getElementById("custID");
+			var custPasswd = document.getElementById("custPasswd");
+			var selectCust = document.getElementById("selectCust").value.split("/");
+			
+			custID.value = selectCust[0];
+			custPasswd.value = selectCust[0];
+	  	}
+	  	function deleteCustBtn(id){
+	  		if(confirm("이 거래처를 삭제하시겠습니까?")){
+	  			location.href="/deleteUser.do?ID="+id;
+	  		}
+	  	}
+	  	function changeStop(id){
+	  		location.href="/updateUser.do?ID="+id+"&STOP=Y";
+	  	}
+	  	function changeType(id){
+	  		location.href="/updateUser.do?ID="+id+"&TYPE=Y";
+	  	}
+	  	function clickTypeRadio(status) {
+	  		if (status == 0){
+	  			document.getElementById("custNm").disabled = false;
+	  			document.getElementById("custBtn").disabled = false;
+	  			document.getElementById("selectCust").disabled = false;
+	  		} else {
+	  			document.getElementById("custNm").disabled = true;
+	  			document.getElementById("custBtn").disabled = true;
+	  			document.getElementById("selectCust").disabled = true;
+	  			document.getElementById("baseOption").selected = true;
+	  		}
+	  	}
+	  	function openLoginLog(popHeight,popWidth,cust_code){
+			var winHeight = document.body.clientHeight;	// 현재창의 높이
+			var winWidth = document.body.clientWidth;	// 현재창의 너비
+			var winX = window.screenLeft;	// 현재창의 x좌표
+			var winY = window.screenTop;	// 현재창의 y좌표
+			
+			var popX = winX + (winWidth - popWidth)/2;
+			var popY = winY + (winHeight - popHeight)/2;
+			
+			window.name = "로그인 로그";
+		    openWin = window.open("/loginLog.do?cust_code="+cust_code,"", "width="+popWidth+"px,height="+popHeight+"px,top="+popY+",left="+popX+", resizable = no, scrollbars = yes");
+		}
+	</script>
+</body>
+</html>

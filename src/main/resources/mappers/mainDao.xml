@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="EUC-KR"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.asia.ProductShipment.main.dao.MainDao">
+	<resultMap type="com.asia.ProductShipment.main.Main" id="mainResultMap">
+		<result property="SHIP_REG_DD" column="SHIP_REG_DD" />
+		<result property="SHIP_SEQ" column="SHIP_SEQ" />
+		<result property="LOGI_CODE" column="LOGI_CODE" />
+		<result property="WARE_H_CODE" column="WARE_H_CODE" />
+		<result property="CUST_CODE" column="CUST_CODE" />
+		<result property="ARRV_CODE" column="ARRV_CODE" />
+		<result property="CAR_CUST_CODE" column="CAR_CUST_CODE" />
+		<result property="CAR_CODE" column="CAR_CODE" />
+		<result property="PRT_TIME" column="PRT_TIME" />
+		<result property="SHIP_QTY" column="SHIP_QTY" />
+		<result property="SHIP_WGT" column="SHIP_WGT" />
+	</resultMap>
+	
+	<resultMap type="com.asia.ProductShipment.main.Main" id="DetailResultMap">
+		<result property="SHIP_REG_DD" column="SHIP_REG_DD" /> 
+		<result property="LOGI_CODE" column="LOGI_CODE" /> 
+		<result property="SHIP_SEQ" column="SHIP_SEQ" /> 
+		<result property="SHIP_DTL_SEQ" column="SHIP_DTL_SEQ" /> 
+		<result property="ROLLNO_FCT" column="ROLLNO_FCT" /> 
+		<result property="ROLLNO_MCH" column="ROLLNO_MCH" /> 
+		<result property="ROLLNO_DD" column="ROLLNO_DD" /> 
+		<result property="ROLLNO_SEQ" column="ROLLNO_SEQ" /> 
+		<result property="ROLLNO_DIV" column="ROLLNO_DIV" /> 
+		<result property="ITEM_CODE" column="ITEM_CODE" /> 
+		<result property="ITEM_SIZE" column="ITEM_SIZE" /> 
+		<result property="WGT" column="WGT" /> 
+		<result property="ADD_SUB_CD" column="ADD_SUB_CD" /> 
+		<result property="RTN_OR_CD" column="RTN_OR_CD" /> 
+		<result property="ADD_SUB_WGT" column="ADD_SUB_WGT" /> 
+		<result property="SALE_WGT" column="SALE_WGT" /> 
+		<result property="PRC_LVL_CD" column="PRC_LVL_CD" /> 
+		<result property="UNIT_PRC" column="UNIT_PRC" /> 
+		<result property="CURRENCY_AMT" column="CURRENCY_AMT" /> 
+		<result property="WON_AMT" column="WON_AMT" /> 
+		<result property="VAT" column="VAT" /> 
+		<result property="REMARK" column="REMARK" /> 
+		<result property="RTN_SHIP_REG_DD" column="RTN_SHIP_REG_DD" /> 
+		<result property="RTN_LOGI_CODE" column="RTN_LOGI_CODE" /> 
+		<result property="RTN_SHIP_SEQ" column="RTN_SHIP_SEQ" /> 
+		<result property="ACCEPT_REG_DD" column="ACCEPT_REG_DD" /> 
+		<result property="ACCEPT_SEQ" column="ACCEPT_SEQ" /> 
+	</resultMap>
+
+   <select id="selectListMain" parameterType="com.asia.ProductShipment.main.Main" resultMap="mainResultMap">
+             SELECT 
+			        M.SHIP_REG_DD AS SHIP_REG_DD,
+			        M.SHIP_SEQ AS SHIP_SEQ,
+			        M.LOGI_CODE AS LOGI_CODE,
+			        BASE.BPBS_WARE_HOUSE.FSEL_WARE_H_NM(M.WARE_H_CODE) AS WARE_H_CODE,
+			        RTRIM(SALE.SPBS_CUST.FSEL_CUST_NM(M.CUST_CODE)) AS CUST_CODE,
+			        RTRIM(SALE.SFBS_ARRV(M.ARRV_CODE)) AS ARRV_CODE,
+			        RTRIM(BASE.BPBS_CUST.FSEL_CUST_NM(M.CAR_CUST_CODE,M.SHIP_DD)) AS CAR_CUST_CODE,
+			        M.CAR_CODE AS CAR_CODE,
+			        SUBSTR(NVL(G.OUT_TM, S.OUT_TM),9,2)||':'||SUBSTR(NVL(G.OUT_TM, S.OUT_TM),11,2) AS PRT_TIME,
+			        M.SHIP_QTY AS SHIP_QTY,
+			        M.SHIP_WGT AS SHIP_WGT
+			FROM 
+			        SALE.SDDO_SHIP_M M 
+ 	   LEFT JOIN 
+ 	   				(
+                        SELECT PROOF_NO1, OUT_TM
+                          FROM LGST.LDTR_GAGE
+                         WHERE GAGE_DD BETWEEN replace(#{fr_date}, '-', '') AND replace(#{to_date}, '-', '')
+                           AND GAGE_OR = '05'
+                           AND PROOF_NO1 IS NOT NULL
+                     UNION ALL
+                         SELECT PROOF_NO2 AS PROOF_NO1, OUT_TM
+                          FROM LGST.LDTR_GAGE
+                         WHERE GAGE_DD BETWEEN replace(#{fr_date}, '-', '') AND replace(#{to_date}, '-', '')
+                           AND GAGE_OR = '05'
+                           AND PROOF_NO2 IS NOT NULL
+                     UNION ALL
+                         SELECT PROOF_NO3 AS PROOF_NO1, OUT_TM
+                          FROM LGST.LDTR_GAGE
+                         WHERE GAGE_DD BETWEEN replace(#{fr_date}, '-', '') AND replace(#{to_date}, '-', '')
+                           AND GAGE_OR = '05'
+                           AND PROOF_NO3 IS NOT NULL
+                    ) G 
+ 	   		  ON 
+ 	   		  		M.SHIP_REG_DD||'-'||M.SHIP_SEQ = G.PROOF_NO1 
+	   LEFT JOIN 
+	   				(
+                        SELECT PROOF_NO1, OUT_TM
+                          FROM LGST.LDTR_GAGE_SHIHWA
+                         WHERE GAGE_DD BETWEEN replace(#{fr_date}, '-', '') AND replace(#{to_date}, '-', '')
+                           AND GAGE_OR = '05'
+                           AND PROOF_NO1 IS NOT NULL
+                     UNION ALL
+                         SELECT PROOF_NO2 AS PROOF_NO1, OUT_TM
+                          FROM LGST.LDTR_GAGE_SHIHWA
+                         WHERE GAGE_DD BETWEEN replace(#{fr_date}, '-', '') AND replace(#{to_date}, '-', '')
+                           AND GAGE_OR = '05'
+                           AND PROOF_NO2 IS NOT NULL
+                     UNION ALL
+                         SELECT PROOF_NO3 AS PROOF_NO1, OUT_TM
+                          FROM LGST.LDTR_GAGE_SHIHWA
+                         WHERE GAGE_DD BETWEEN replace(#{fr_date}, '-', '') AND replace(#{to_date}, '-', '')
+                           AND GAGE_OR = '05'
+                           AND PROOF_NO3 IS NOT NULL
+                    ) S 
+	   		   ON 
+	   		   		M.SHIP_REG_DD||'-'||M.SHIP_SEQ = S.PROOF_NO1
+			WHERE   
+			        M.LOGI_CODE     IN ('41','45')
+			  AND
+	  		<if test="Authorities != '[ROLE_ADMIN]'">
+		  			M.CUST_CODE = #{CUST_CODE}
+		  	  AND
+	  		</if>
+			  	    M.SHIP_REG_DD BETWEEN replace(#{fr_date}, '-', '') AND replace(#{to_date}, '-', '')
+		 ORDER BY
+		 	        M.SHIP_REG_DD, M.SHIP_SEQ
+   </select>
+   
+   <select id="selectListDetail" parameterType="com.asia.ProductShipment.main.Main" resultMap="DetailResultMap">
+             SELECT 
+				   SHIP_REG_DD, 
+				   LOGI_CODE, 
+				   SHIP_SEQ, 
+				   SHIP_DTL_SEQ, 
+				   ROLLNO_FCT, 
+				   ROLLNO_MCH, 
+				   ROLLNO_DD, 
+				   ROLLNO_SEQ, 
+				   ROLLNO_DIV, 
+				   BASE.BPBS_ITEM.FSEL_ITEM_NM(ITEM_CODE) AS ITEM_CODE, 
+				   ITEM_SIZE, 
+				   WGT, 
+				   ADD_SUB_CD, 
+				   RTN_OR_CD, 
+				   ADD_SUB_WGT, 
+				   SALE_WGT, 
+				   BASE.BFBS_CODE('PRC_LVL_CD', PRC_LVL_CD) as PRC_LVL_CD, 
+				   UNIT_PRC, 
+				   CURRENCY_AMT, 
+				   WON_AMT, VAT, 
+				   REMARK, 
+				   RTN_SHIP_REG_DD, 
+				   RTN_LOGI_CODE, 
+				   RTN_SHIP_SEQ, 
+				   ACCEPT_REG_DD, 
+				   ACCEPT_SEQ
+			  FROM 
+			       SALE.SDDO_SHIP_D
+		 	 WHERE 
+			       SHIP_REG_DD = #{SHIP_REG_DD}
+			   AND
+			       LOGI_CODE = #{LOGI_CODE}
+			   AND
+			       SHIP_SEQ = #{SHIP_SEQ}
+		  ORDER BY ITEM_CODE, ITEM_SIZE, ROLLNO_FCT, ROLLNO_MCH, ROLLNO_DD, ROLLNO_SEQ
+   </select>
+</mapper>

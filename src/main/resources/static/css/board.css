@@ -1,0 +1,10 @@
+@charset "EUC-KR";
+body {
+  font-size: .875rem;
+  width: 1280px;
+  	max-width: none !important;
+}
+.container-fluid{
+	width: 1120px;
+  	max-width: none !important;
+}

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> -->
+<meta name="description" content="">
+<meta name="author" content="">
+<title>아세아제지 제품출고현황</title>
+
+<!-- Bootstrap core CSS -->
+<link rel="icon" th:href="@{image/icon.ico}">
+<link th:href="@{css/sb-admin-2.min.css}" rel="stylesheet" type="text/css">
+<link th:href="@{css/bootstrap-4.0.0/dist/css/bootstrap.min.css}" rel="stylesheet" type="text/css">
+<!-- Custom styles for this page -->
+<link th:href="@{css/dataTables.bootstrap4.css}" rel="stylesheet">
+<!-- Custom styles for this template -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link th:href="@{css/bootstrap-4.0.0/docs/4.0/examples/dashboard/dashboard.css}" rel="stylesheet" type="text/css">
+<link th:href="@{css/board.css}" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+	<input type="hidden" id="clickedList" value="">
+	<nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0" style="z-index: 150;position: sticky">
+		<a class="navbar-brand col-xs-2" href="/main.do">
+			<img alt="" src="image\150px_logo_hor_white.png">
+		</a>
+		<ul class="navbar-nav px-3">
+			<li class="nav-item text-nowrap">
+				<a class="nav-link" href="/logout">Sign out</a>
+			</li>
+		</ul>
+	</nav>
+
+	<div class="container-fluid" style="width:100%; margin: 0px;">
+		<div class="row">
+			<nav class="col-xs-2 bg-light sidebar" style="margin-top: 63px;width: 200px !important;">
+				<div class="sidebar-sticky">
+					<ul class="nav flex-column" >
+						<li class="nav-item" style="padding: 12px 0;">
+							<a class="nav-link2 active" href="/board.do"> 
+								<span data-feather="info"></span> 공지사항
+							</a>
+						</li>
+						<li class="nav-item" style="padding: 12px 0;">
+							<a class="nav-link2" href="/main.do"> 
+								<span data-feather="truck"></span> 출고현황
+							</a>
+						</li>
+						<li class="nav-item" style="padding: 12px 0;">
+							<a class="nav-link2" href="/password.do"> 
+								<span data-feather="user"></span> 개인정보
+							</a>
+						</li>
+						<li class="nav-item" style="padding: 12px 0;" sec:authorize="hasRole('ROLE_ADMIN')">
+							<a class="nav-link2" href="/users.do"> 
+								<span data-feather="users"></span> 유저관리
+							</a>
+						</li>
+					</ul>
+				</div>
+			</nav>
+			<main role="main" class="col-xs-9 ml-sm-auto col-xs-10 pt-3 px-4" style="width:100%; margin-left: 200px !important;">
+			<h1 class="h3 mb-2 text-gray-800">공지사항</h1>
+			<p class="mb-4"></p>
+				<form th:action="@{/boardUpdate.do}" method="post">
+				<input type="hidden" name="noticeID" th:value="${noticeID}">
+				<div class="card shadow xs-4">
+					<div class="card-header py-3 py-3 d-flex flex-row align-items-center justify-content-between">
+		              <h6 class="m-0 font-weight-bold text-primary">글쓰기</h6>
+		              <div class="dropdown no-arrow">
+							<button type="submit" class="btn btn-success">작성하기</button>
+					  </div>
+		            </div>
+		            <div class="card-body">
+		            	<table class="table table-bordered">
+							<tr>
+								<th width="100px" style="text-align: center;">제목</th>
+								<td><input type="text" class="form-control" name="title" id="title" th:value="${title}"></td>
+							</tr>
+							<tr>
+								<th style="text-align: center;">내용</th>
+								<td><textarea class="form-control" rows="10" name="body" id="body" th:text="${body}"></textarea></td>
+							</tr>
+		            	</table>
+		            </div>
+				</div>
+				</form>
+			</main>
+		</div>
+	</div>
+	<!-- jquery -->
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<!-- Bootstrap core JavaScript
+    ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script th:src="@{css/bootstrap-4.0.0/assets/js/vendor/popper.min.js}"></script>
+	<script th:src="@{css/bootstrap-4.0.0/dist/js/bootstrap.min.js}"></script>
+
+	<!-- Icons -->
+	<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+	
+	  <!-- Page level plugins -->
+	  <script th:src="@{js/jquery.dataTables.js}"></script>
+	  <script th:src="@{js/dataTables.bootstrap4.js}"></script>
+	  <script>
+      feather.replace()
+    </script>
+    <script type="text/javascript">
+
+	</script>
+</body>
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="UTF-8">
+<!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> -->
+<meta name="description" content="">
+<meta name="author" content="">
+<title>아세아제지 제품출고현황</title>
+
+<!-- Bootstrap core CSS -->
+<link rel="icon" th:href="@{image/icon.ico}">
+<link th:href="@{css/sb-admin-2.min.css}" rel="stylesheet" type="text/css">
+<link th:href="@{css/bootstrap-4.0.0/dist/css/bootstrap.min.css}" rel="stylesheet" type="text/css">
+<!-- Custom styles for this template -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link th:href="@{css/bootstrap-4.0.0/docs/4.0/examples/dashboard/dashboard.css}" rel="stylesheet" type="text/css">
+<link th:href="@{css/index.css}" rel="stylesheet" type="text/css">
+
+</head>
+
+<body>
+	<input type="hidden" id="clickedList" value="">
+	<nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0" style="z-index: 150;position: sticky">
+		<a class="navbar-brand col-xs-2" href="/main.do">
+			<img alt="" src="image\150px_logo_hor_white.png">
+		</a>
+		<ul class="navbar-nav px-3">
+			<li class="nav-item text-nowrap">
+				<a class="nav-link" href="/logout">Sign out</a>
+			</li>
+		</ul>
+	</nav>
+
+	<div class="container-fluid">
+		<div class="row">
+			<nav class="col-xs-2 bg-light sidebar" style="padding-top: 63px;width: 200px !important; height: auto;">
+				<div class="sidebar-sticky" style="">
+					<ul class="nav flex-column">
+						<li class="nav-item" style="padding: 12px 0;">
+							<a class="nav-link2" href="/board.do"> 
+								<span data-feather="info"></span> 공지사항
+							</a>
+						</li>
+						<li class="nav-item" style="padding: 12px 0;">
+							<a class="nav-link2 active" href="/main.do"> 
+								<span data-feather="truck"></span> 출고현황
+							</a>
+						</li>
+						<li class="nav-item" style="padding: 12px 0;">
+							<a class="nav-link2" href="/password.do"> 
+								<span data-feather="user"></span> 개인정보
+							</a>
+						</li>
+						<li class="nav-item" style="padding: 12px 0;" sec:authorize="hasRole('ROLE_ADMIN')">
+							<a class="nav-link2" href="/users.do"> 
+								<span data-feather="users"></span> 유저관리
+							</a>
+						</li>
+					</ul>
+				</div>
+			</nav>
+
+			<main role="main" class="col-xs-9 ml-sm-auto col-xs-10 pt-3 px-4" style="width:100%; margin-left: 200px !important;">
+				<div class="card shadow xs-4">
+					<div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+						<h6 class="m-0 font-weight-bold text-primary">출고현황 Master</h6>
+						<div class="dropdown no-arrow">
+							<a href="#" onclick="excelDown('mainTable','A'); return false;">
+								<img alt="" src="image\excel_download_btn.png">
+							</a>
+						</div>
+					</div>
+					<div class="card-body">
+						<div class="d-sm-flex align-items-center justify-content-between mb-4">
+							<form class="form-inline" name="frm" method="post">
+									날짜&nbsp;
+									<input type="text" id="fr_date" name="fr_date"
+										   onFocus="this.blur()" autocomplete="off" style="text-align: center;"
+										   th:value="${fr_date}">
+									&nbsp;
+									<span class="hidden-xs">~</span>&nbsp; 
+									<input type="text" id="to_date" name="to_date"
+										   onFocus="this.blur()" autocomplete="off"
+										   style="text-align: center;" th:value="${to_date}">
+									&nbsp;
+									<button class="btn btn-outline-secondary" onclick="javascript:goSubmit()">조회</button>
+							</form>
+						</div>
+							<table class="table table-bordered table-sm" id="mainTable">
+								<thead>
+									<tr>
+										<th class="mainTable_th">순번</th>
+										<th class="mainTable_th">출하번호</th>
+										<th class="mainTable_th">출고공장</th>
+										<th class="mainTable_th">구입처</th>
+										<th class="mainTable_th">도착지</th>
+										<th class="mainTable_th">운송사</th>
+										<th class="mainTable_th">차량번호</th>
+										<th class="mainTable_th">출고시간</th>
+										<th class="mainTable_th">출하수량</th>
+										<th class="mainTable_th">출하중량</th>
+										<th style="display: none;"></th>
+									</tr>
+								</thead>
+								<tbody id="ship_tbody">
+									<tr class="mainTable_tr" th:if="${#lists.size(data) > 0}" th:each="list, iterState : ${data}" th:attr="onclick=|viewDetail('${iterState.index}')|">
+										<td width="40px" th:text="${iterState.count}"></td>
+										<td width="110px" th:text="|${list.SHIP_REG_DD} - ${list.SHIP_SEQ}|"></td>
+										<td width="100px" th:text="${list.WARE_H_CODE}"></td>
+										<td th:text="${list.CUST_CODE}"></td>
+										<td width="80px" style="text-align: center;" th:text="${list.ARRV_CODE}"></td>
+										<td width="140px" th:text="${list.CAR_CUST_CODE}"></td>
+										<td width="80px" style="text-align: center;" th:text="${list.CAR_CODE}"></td>
+										<td th:if="${list.PRT_TIME != ':' && list.SHIP_QTY != '0'}" width="80px" style="text-align: center;" th:text="${list.PRT_TIME}"></td>
+										<td th:if="${list.PRT_TIME == ':' && list.SHIP_QTY != '0'}" width="80px" style="text-align: center; color: blue; font-weight: bold;" th:text="출차중"></td>
+										<td th:if="${list.SHIP_QTY == '0'}" width="80px" style="text-align: center; color: red; font-weight: bold;" th:text="상차중"></td>
+										<td width="80px" style="text-align: right;" th:text="${list.SHIP_QTY}"></td>
+										<td th:if="${list.SHIP_WGT == '0'}" width="80px" style="text-align: right;" th:text="${list.SHIP_WGT}"></td>
+										<td th:if="${list.SHIP_WGT != '0'}" width="80px" style="text-align: right;" th:text="${#numbers.formatInteger(list.SHIP_WGT,3,'COMMA')}"></td>
+										<td style="display: none;">
+											<input type="hidden" name="openOrClose" th:value="0">
+											<input type="hidden" name="tdInfo" th:value="|${list.SHIP_REG_DD}/${list.LOGI_CODE}/${list.SHIP_SEQ}|">
+										</td>
+									</tr>
+									<tr th:if="${#lists.size(data) == 0}"
+									style="background-color: white;
+										   text-align: center;
+										   height:100px;
+										   font-size: 20px;
+										   font-weight: bold;">
+										<td colspan="10" style="vertical-align : middle !important; text-align: center;">데이터가 없습니다.</td> 
+									</tr>
+								</tbody>
+							</table>
+							<script>
+								/* $("#tableLength").val($("#ship_tbody tr").length); */
+							</script>
+					</div>
+				</div>
+			</main>
+		</div>
+	</div>
+
+	<!-- Bootstrap core JavaScript
+    ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script th:src="@{css/bootstrap-4.0.0/assets/js/vendor/popper.min.js}"></script>
+	<script th:src="@{css/bootstrap-4.0.0/dist/js/bootstrap.min.js}"></script>
+	
+	<!-- jquery -->
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<script src="js/jquery.table2excel.js"></script>
+
+
+	<!-- Icons -->
+	<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+	<script>
+	     feather.replace()
+	</script>
+   
+    <script type="text/javascript">
+		var now = new Date();
+	    var year= now.getFullYear();
+	    var mon = (now.getMonth()+1)>9 ? ''+(now.getMonth()+1) : '0'+(now.getMonth()+1);
+	    var day = now.getDate()>9 ? ''+now.getDate() : '0'+now.getDate();
+	              
+	    var startDate = year + '-' + mon + '-01';
+	    var endDate = year + '-' + mon + '-' + day;
+	</script>
+	<script type="text/javascript">
+	  	function goSubmit(){
+			var fr_date_ym = document.getElementById("fr_date").value.split("-");
+			var to_date_ym = document.getElementById("to_date").value.split("-");
+			
+			if(fr_date_ym[0] == to_date_ym[0]){
+				var f = document.frm;
+				f.target = "_self";
+				f.action="/main.do";		
+				f.submit();	
+			} else {
+				alert("동일 년만 선택 가능합니다.");
+			}
+		}
+	  	
+	  	Number.prototype.format = function(){
+	  	    if(this==0) return 0;
+	  	 
+	  	    var reg = /(^[+-]?\d+)(\d{3})/;
+	  	    var n = (this + '');
+	  	 
+	  	    while (reg.test(n)) n = n.replace(reg, '$1' + ',' + '$2');
+	  	 
+	  	    return n;
+	  	};
+	  	 
+	  	// 문자열 타입에서 쓸 수 있도록 format() 함수 추가
+	  	String.prototype.format = function(){
+	  	    var num = parseFloat(this);
+	  	    if( isNaN(num) ) return "0";
+	  	 
+	  	    return num.format();
+	  	};
+	  	
+	  	function viewDetail(cnt) {
+	  		var oc = document.getElementsByName("openOrClose")[cnt]; //열린 상태인지, 닫힌 상태인지 체크
+	  		var tdInfo = {}; //해당 행에 있는 넘길 데이터를 받아온다.
+		  	tdInfo["detailViewData"] = document.getElementsByName("tdInfo")[cnt].value;
+		  	var tbody = document.getElementById("ship_tbody");
+		  	var v_count = 0;
+		  	
+	  		for(var i in tbody.rows ) {
+	  			if(+cnt+1 == tbody.rows[i].cells[0].innerText){
+	  				v_count = i;
+	  				break;
+	  			}
+	  		}
+		  	
+	  		if(oc.value == '0') {
+	  	  		$.ajax({
+	  	            type:"POST",
+	  	            contentType: "application/json",
+	  	            url:"/viewDetail.do",
+	  	            data: JSON.stringify(tdInfo),
+	  	            success: function(t){
+	  	            	var row = tbody.insertRow(+v_count+1);
+	  	            	var cell1 = row.insertCell(0);
+	  	                cell1.setAttribute("colspan","10");
+	  	                
+	  	                //var detailList = JSON.stringify(t,null,4);
+	  	                //var detailList = JSON.parse(t);
+	  	                //alert(t[0].rollno_MCH);
+	  	                
+	  	                var rowItem = ""
+	  	            	rowItem += "<div class='card shadow mb-4'  style='width:50%;'>"
+	  	           		rowItem += "					<div class='card-header py-3 d-flex flex-row align-items-center justify-content-between'>"
+	  	           		rowItem += "						<h6 class='m-0 font-weight-bold text-primary'>출고현황 Detail</h6>"
+	  	           		rowItem += "						<div class='dropdown no-arrow'>"
+	  	           		rowItem += "							<a href='#' onclick='excelDown(\"subTable_"+cnt+"\",\""+tbody.rows[v_count].cells[1].innerText.replace(/\s/g, '').replace('-','_')+"\")'; return false;'> "
+	  	           		rowItem += "								<img alt='' src='image/excel_download_btn.png'> "
+	  	           		rowItem += "						    </a> "
+	  	           		rowItem += "						</div>"
+	  	           		rowItem += "					</div>"
+	  	           		rowItem += "					<div class='card-body'>"
+	  	           		rowItem += "						<div class='d-sm-flex align-items-center justify-content-between mb-4'>"
+	  	           		rowItem += "							<table id='subTable_"+cnt+"' class='table table-bordered table-sm'>"
+	  	           		rowItem += "								<thead>"
+	  	           		rowItem += "									<tr>"
+	  	           		rowItem += "										<th class='subTable_"+cnt+"_th'>Roll No</th>"
+	  	           		//rowItem += "										<th class='subTable_"+cnt+"_th'>단가등급</th>"
+	  	           		rowItem += "										<th class='subTable_"+cnt+"_th'>품목</th>"
+	  	           		rowItem += "										<th class='subTable_"+cnt+"_th'>지폭</th>"
+	  	           		rowItem += "										<th class='subTable_"+cnt+"_th'>출하중량</th>"
+	  	           		//rowItem += "										<th class='subTable_"+cnt+"_th'>판매중량</th>"
+	  	           		//rowItem += "										<th class='subTable_"+cnt+"_th'>단가</th>"
+	  	           		//rowItem += "										<th class='subTable_"+cnt+"_th'>금액</th>"
+	  	           		rowItem += "									</tr>"
+	  	           		rowItem += "								</thead>"
+	  	           		rowItem += "								<tbody id='ship_tbody_detail'>"
+	  	           		
+	  	           		for(var i in t) {
+	  	           		
+		  	           		rowItem += "									<tr class='subTable_"+cnt+"_tr'>"
+		  	           		rowItem += "										<td style='text-align:center;'>"
+		  	           																+ t[i].rollno_FCT + "-"
+		  	           																+ t[i].rollno_MCH + "-"
+		  	           																+ t[i].rollno_DD  +  "-"
+		  	           															    + t[i].rollno_SEQ + "</td>"
+		  	           		//rowItem += "										<td>"+ t[i].prc_LVL_CD+"</td>"
+		  	           		rowItem += "										<td>"+ t[i].item_CODE +"</td>"
+		  	           		rowItem += "										<td style='text-align:right;'>"+ t[i].item_SIZE +"</td>"
+		  	           		rowItem += "										<td style='text-align:right;'>"+ t[i].wgt.format() +"</td>"
+		  	           		//rowItem += "										<td style='text-align:right;'>"+ t[i].sale_WGT.format() +"</td>"
+		  	           		//rowItem += "										<td style='text-align:right;'>"+ t[i].unit_PRC.format() +"</td>"
+		  	           		//rowItem += "										<td style='text-align:right;'>"+ t[i].currency_AMT.format() +"</td>"
+		  	           		rowItem += "									</tr>"
+	  	           		
+	  	           		}
+	  	           		
+	  	           		rowItem += "								</tbody>"
+	  	           		rowItem += "							</table>"
+	  	           		rowItem += "						</div>"
+	  	           		rowItem += "					</div>"
+	  	           		rowItem += "				</div>"
+	  	                
+	  	                cell1.innerHTML = rowItem;
+	  	          		//var rowItem = "<tr><td colspan='9'></td></tr>";
+	  	            	//$('#factory_table').append(rowItem);
+	  	            	clickedList.value = clickedList.value + "," + cnt; 
+	  	            	oc.value = '1';
+	  	            },
+	  	            error: function(request, status, error) {
+	  	                alert("code:"+request.status+"\n"
+	  	                			 +"message:"+request.responseText+"\n"
+	  	                			 +"error:"+error);
+	  	            }  
+	  	        });
+	  		} else {
+	  			tbody.deleteRow(+v_count+1);
+	  			clickedList.value = +clickedList.value.replace("," + cnt, ""); 
+	  			oc.value = '0';
+	  		}
+	  	}
+	  	
+	  	function excelDown(table, num) {
+	  		var fr_date_ym = document.getElementById("fr_date").value.replace(/\-/g,'');
+			var to_date_ym = document.getElementById("to_date").value.replace(/\-/g,'');
+  	        var myTable = $("#"+table);
+  	        //var rows = $("#"+table+" > tbody > tr").length;
+  	        var rows = $("."+table+"_tr").length;
+  	       //var columns = $("#"+table+" > thead > tr > th").length;
+  	        var columns = $("."+table+"_th").length;
+  	        
+  	        if (rows < 2) {
+  	            alert("엑셀파일로 저장할 데이터가 없습니다.");
+  	            return;
+  	        }
+  	        var dataParam = tableToJson(myTable, table);
+  	        var myTitle = dataParam[0].toString();
+  	        var myContents = dataParam[1];
+  	        var name = "Asiapaper_";
+  	        
+  	        //파일명을 결정해준다.
+  	        if(num == 'A'){
+  	        	name += fr_date_ym + "_" + to_date_ym;
+  	        } else {
+  	        	name += num;
+  	        }
+  	        
+  	        var form = "<form action='/excelDown.do' method='post'>";
+  	        form += "<input type='hidden' name='title' value='" + myTitle + "' />";
+  	        form += "<input type='hidden' name='contents' value='" + myContents + "' />";
+  	        form += "<input type='hidden' name='name' value='" + name + "' />";
+  	        form += "<input type='hidden' name='rows' value='" + rows + "' />";
+  	        form += "<input type='hidden' name='columns' value='" + columns + "' />";
+  	        form += "</form>";
+  	                
+  	        jQuery(form).appendTo("body").submit().remove();
+	  	}
+	  	
+	  	function tableToJson(table, id) {
+	  	    var myRows = [];
+	  	    var title = [];
+	  	    //var $headers = $("th");
+	  	    var $headers = $("."+id+"_th").each(
+	  	    		function(index, item) {
+	  	        		title[index] = $(item).html() + "/" + $(item).attr("colspan");
+	  	    });
+	  	    var $rows = $("."+id+"_tr").each(
+	  	            function(index) {
+	            		$cells = $(this).find("td");
+	  	                myRows[index] = {};
+	  	                $cells.each(function(cellIndex) {
+	  	                    myRows[index][$($headers[cellIndex]).html()] = $(this).html();
+	  	                });
+	  	            });
+	  	    var myObj = {};
+	  	    myObj = myRows;
+	  	 
+	  	    var myJson = JSON.stringify(myObj);
+	  	    return [ title, myJson ];
+	  	}
+	  	
+	  //DatePicker 생성
+		$('#fr_date').datepicker({
+				pickTime : false,
+				dateFormat: "yy-mm-dd",
+				defalutDate : new Date(),
+				changeMonth: true, 
+		        changeYear: true,
+		        nextText: '다음 달',
+		        prevText: '이전 달',
+		        dayNames: ['일요일','월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
+		        dayNamesMin: ['일', '월', '화', '수', '목', '금', '토'], 
+		        monthNamesShort: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+		        monthNames: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+		        constrainInput: false
+		 });
+		if (!$('#fr_date').val()) {
+			$('#fr_date').val(endDate);	
+		}
+		
+		$('#to_date').datepicker({
+				pickTime : false,
+				dateFormat: "yy-mm-dd",
+				defalutDate : new Date(),
+				changeMonth: true, 
+		        changeYear: true,
+		        nextText: '다음 달',
+		        prevText: '이전 달',
+		        dayNames: ['일요일','월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
+		        dayNamesMin: ['일', '월', '화', '수', '목', '금', '토'], 
+		        monthNamesShort: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+		        monthNames: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월']
+		 });
+		if (!$('#to_date').val()) {
+			$('#to_date').val(endDate);	
+		}
+		</script>
+
+</body>
+</html>

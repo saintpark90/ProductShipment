@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="UTF-8">
+<!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> -->
+<meta name="description" content="">
+<meta name="author" content="">
+<title>아세아제지 제품출고현황</title>
+
+<!-- Bootstrap core CSS -->
+<link rel="icon" th:href="@{image/icon.ico}">
+<link th:href="@{css/sb-admin-2.min.css}" rel="stylesheet" type="text/css">
+<link th:href="@{css/bootstrap-4.0.0/dist/css/bootstrap.min.css}" rel="stylesheet" type="text/css">
+<!-- Custom styles for this page -->
+<link th:href="@{css/dataTables.bootstrap4.css}" rel="stylesheet">
+<!-- Custom styles for this template -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link th:href="@{css/bootstrap-4.0.0/docs/4.0/examples/dashboard/dashboard.css}" rel="stylesheet" type="text/css">
+<link th:href="@{css/board.css}" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+	<input type="hidden" id="clickedList" value="">
+	<nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0" style="z-index: 150;position: sticky">
+		<a class="navbar-brand col-xs-2" href="/main.do">
+			<img alt="" src="image\150px_logo_hor_white.png">
+		</a>
+		<ul class="navbar-nav px-3">
+			<li class="nav-item text-nowrap">
+				<a class="nav-link" href="/logout">Sign out</a>
+			</li>
+		</ul>
+	</nav>
+
+	<div class="container-fluid" style="width:100%; margin: 0px;">
+		<div class="row">
+			<nav class="col-xs-2 bg-light sidebar" style="margin-top: 63px;width: 200px !important;">
+				<div class="sidebar-sticky">
+					<ul class="nav flex-column">
+						<li class="nav-item" style="padding: 12px 0;">
+							<a class="nav-link2 active" href="/board.do"> 
+								<span data-feather="info"></span> 공지사항
+							</a>
+						</li>
+						<li class="nav-item" style="padding: 12px 0;">
+							<a class="nav-link2" href="/main.do"> 
+								<span data-feather="truck"></span> 출고현황
+							</a>
+						</li>
+						<li class="nav-item" style="padding: 12px 0;">
+							<a class="nav-link2" href="/password.do"> 
+								<span data-feather="user"></span> 개인정보
+							</a>
+						</li>
+						<li class="nav-item" style="padding: 12px 0;" sec:authorize="hasRole('ROLE_ADMIN')" id="adminMenu">
+							<a class="nav-link2" href="/users.do"> 
+								<span data-feather="users"></span> 유저관리
+							</a>
+						</li>
+					</ul>
+				</div>
+			</nav>
+			<main role="main" class="col-xs-9 ml-sm-auto col-xs-10 pt-3 px-4" style="width:100%; margin-left: 200px !important;">
+			<h1 class="h3 mb-2 text-gray-800">공지사항</h1>
+			<p class="mb-4"></p>
+				<div class="card shadow xs-4">
+					<div class="card-header py-3 py-3 d-flex flex-row align-items-center justify-content-between">
+		              <h6 class="m-0 font-weight-bold text-primary">공지사항</h6>
+		              <div class="dropdown no-arrow" sec:authorize="hasRole('ROLE_ADMIN')">
+							<button class="btn btn-success" onclick="javascript:location.href='/boardWriteForm.do'">글쓰기</button>
+					  </div>
+		            </div>
+		            <div class="card-body">
+		            	<table class="table table-bordered" id="dataTable">
+		            		<thead>
+						      <tr>
+						        <th width="60px">번호</th>
+						       <!--  <th>구분</th> -->
+						        <th>제목</th>
+						        <th width="100px">작성일</th>
+						        <th width="100px">작성자</th>
+						        <th style="display: none;"></th>
+						      </tr>
+						    </thead>
+						    <tbody id="notice_tbody">
+						    	<tr th:if="${#lists.size(data) > 0}" th:each="list, iterState : ${data}" th:attr="onclick=|viewDetail('${list.noticeID}','${iterState.index}')|">
+						    		<td th:text="${list.noticeID}" style="text-align: center;"></td>
+						    		<!-- <td width="120px" th:if="${list.isImportant == 0}" th:text="일반공지" style="text-align: center;"></td>
+						    		<td width="120px" th:if="${list.isImportant != 0}" th:text="긴급공지"></td> -->
+						    		<td th:text="${list.title}"></td>
+						    		<td th:text="${list.regDate}" style="text-align: center;"></td>
+						    		<td th:text="${list.writer}" style="text-align: center;"></td>
+						    		<td style="display: none;">
+										<input type="hidden" name="openOrClose" th:value="0">
+									</td>
+						    	</tr>
+						    	<tr th:if="${#lists.size(data) == 0}">
+						    		<td colspan="5" 
+						    		style="background-color: white;
+										   text-align: center;
+										   height:50px;
+										   font-size: 20px;
+										   font-weight: bold;">공지사항이 없습니다.</td>
+						    	</tr>
+						    </tbody>
+		            	</table>
+		            </div>
+				</div>
+			</main>
+		</div>
+	</div>
+	<!-- jquery -->
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<!-- Bootstrap core JavaScript
+    ================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+	<script th:src="@{css/bootstrap-4.0.0/assets/js/vendor/popper.min.js}"></script>
+	<script th:src="@{css/bootstrap-4.0.0/dist/js/bootstrap.min.js}"></script>
+
+	<!-- Icons -->
+	<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+	
+	  <!-- Page level plugins -->
+	  <script th:src="@{js/jquery.dataTables.js}"></script>
+	  <script th:src="@{js/dataTables.bootstrap4.js}"></script>
+	  <script>
+      feather.replace()
+    </script>
+    <script type="text/javascript">
+	    $(document).ready( function () {
+	        $('#dataTable').DataTable().order([0,'desc']).draw();
+	    } );
+	    
+	    function viewDetail(nID, cnt) {
+	  		var oc = document.getElementsByName("openOrClose")[cnt]; //열린 상태인지, 닫힌 상태인지 체크
+		  	var tbody = document.getElementById("notice_tbody");
+		  	var v_count = 0;
+		  	
+		  	for(var i in tbody.rows ) {
+	  			if(+cnt+1 == tbody.rows[i].cells[0].innerText){
+	  				v_count = i;
+	  				break;
+	  			}
+	  		}
+		  	
+	  		if(oc.value == '0') {
+	  	  		$.ajax({
+	  	            type:"POST",
+	  	            url:"/viewDetail_board.do",
+	  	          	data: {noticeID : nID},
+	  	            success: function(t){
+	  	            	var row = tbody.insertRow(+v_count+1);
+	  	            	var cell1 = row.insertCell(0);
+	  	            	var am = document.getElementById("adminMenu");
+	  	            	var rowItem = ""
+	  	            		rowItem += "    "+t[0].body+" "
+	  	            		
+	  	            		if(am != null && am != "undefined"){
+	  	            			rowItem += "<div class='dropdown no-arrow' style='text-align:right;'> "
+	  		  	            	rowItem += "	<button class='btn btn-info' onclick='javascript:location.href=\"/boardUpdateForm.do?noticeID="+nID+"\"'>수정</button> "
+	  		  	            	rowItem += "	<button class='btn btn-warning' onclick='if(confirm(\"정말 삭제하시겠습니까?\")){javascript:location.href=\"/boardDelete.do?noticeID="+nID+"\"}'>삭제</button> "
+	  		  	            	rowItem += "</div> " 
+	  	            		}
+	  	            	
+  		  	           	cell1.setAttribute("colspan","5");
+  		  	           	cell1.setAttribute("style","white-space:pre-line;");
+	  	                cell1.innerHTML = rowItem;
+	  	            	clickedList.value = clickedList.value + "," + cnt; 
+	  	            	oc.value = '1';
+	  	            },
+	  	            error: function(request, status, error) {
+	  	                alert("code:"+request.status+"\n"
+	  	                			 +"message:"+request.responseText+"\n"
+	  	                			 +"error:"+error);
+	  	            }  
+	  	        });
+	  		} else {
+	  			tbody.deleteRow(+v_count+1);
+	  			clickedList.value = +clickedList.value.replace("," + cnt, ""); 
+	  			oc.value = '0';
+	  		}
+	  	}
+	</script>
+</body>
+</html>

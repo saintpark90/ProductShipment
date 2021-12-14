@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="EUC-KR"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.asia.ProductShipment.users.dao.UsersDao">
+	<resultMap type="com.asia.ProductShipment.users.Users" id="usersResultMap">
+		<result property="ID" column="ID" />
+		<result property="PWD" column="PWD" />
+		<result property="CUST_CODE" column="CUST_CODE" />
+		<result property="CUST_NM" column="CUST_NM" />
+		<result property="BZ_REG_NO" column="BZ_REG_NO" />
+		<result property="CHK_PWD" column="CHK_PWD" />
+		<result property="STOP" column="STOP" />
+		<result property="TYPE" column="TYPE" />
+	</resultMap>
+	<resultMap type="com.asia.ProductShipment.users.Users" id="selectCustResultMap">
+		<result property="CUST_CODE" column="CUST_CODE" />
+		<result property="CUST_NM" column="CUST_NM" />
+		<result property="BZ_REG_NO" column="BZ_REG_NO" />
+	</resultMap>
+
+	<select id="selectUsersList" parameterType="com.asia.ProductShipment.users.Users" resultMap="usersResultMap">
+		SELECT
+			ID,
+			PWD,
+			CUST_CODE,
+			CUST_NM,
+			SUBSTR(BZ_REG_NO,1,3)||'-'||SUBSTR(BZ_REG_NO,4,2)||'-'||SUBSTR(BZ_REG_NO,6) BZ_REG_NO,
+			CHK_PWD,
+			STOP,
+			TYPE
+		FROM
+			SALE.SHIP_PROD_USER_INFO
+	ORDER BY
+		    TYPE, CUST_NM
+	</select>
+	
+	<select id="selectCust" parameterType="com.asia.ProductShipment.users.Users" resultMap="selectCustResultMap">
+		SELECT 
+			CUST_CODE,
+			CUST_NM,
+			bz_rge_no BZ_REG_NO
+		FROM 
+			BASE.BDBS_CUST
+		WHERE 
+			SALE_CUST_YN = 'Y'
+		AND 
+			cust_nm like '%'||#{CUST_NM}||'%'
+		ORDER BY 
+			cust_nm
+	</select>
+	
+	<select id="selectUserCustcode" parameterType="com.asia.ProductShipment.users.Users" resultType="string">
+   		SELECT 
+   			CUST_CODE
+   		FROM 
+   			SALE.SHIP_PROD_USER_INFO
+   		WHERE 
+   			ID = #{ID}
+   </select>
+   
+   <select id="selectUserPassword" parameterType="com.asia.ProductShipment.users.Users" resultType="string">
+   		SELECT 
+   			PWD
+   		FROM 
+   			SALE.SHIP_PROD_USER_INFO
+   		WHERE 
+   			ID = #{ID}
+   </select>
+   
+   <select id="selectUserInfo" parameterType="com.asia.ProductShipment.users.Users" resultMap="usersResultMap">
+   		SELECT
+			ID,
+			PWD,
+			CUST_CODE,
+			CUST_NM,
+			CHK_PWD,
+			STOP,
+			TYPE
+		FROM
+			SALE.SHIP_PROD_USER_INFO
+		WHERE
+			ID = #{ID}
+   </select>
+	
+	<insert id="insertUser" parameterType="com.asia.ProductShipment.users.Users">
+		INSERT INTO SALE.SHIP_PROD_USER_INFO
+			(ID, PWD, CUST_CODE, CUST_NM, BZ_REG_NO, CHK_PWD, STOP, TYPE)
+		VALUES
+			(#{ID}, #{PWD}, #{CUST_CODE}, #{CUST_NM}, #{BZ_REG_NO}, 0, 'N', #{TYPE})
+	</insert>
+	
+	<update id="updateUser" parameterType="com.asia.ProductShipment.users.Users">
+		UPDATE
+			SALE.SHIP_PROD_USER_INFO
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="STOP != null">
+				STOP = DECODE(STOP,'Y','N','Y'),
+			</if>
+			<if test="TYPE != null">
+				TYPE = DECODE(TYPE,'ADMIN','USER','ADMIN'),
+			</if>
+		</trim>
+	  WHERE
+	  		ID = #{ID}
+	</update>
+	
+	<update id="updateUserPassword" parameterType="com.asia.ProductShipment.users.Users">
+		UPDATE
+			SALE.SHIP_PROD_USER_INFO
+		SET
+			PWD = #{PWD}
+	  WHERE
+	  		ID = #{ID}
+	</update>
+	
+	<update id="updateUserPwdCount" parameterType="com.asia.ProductShipment.users.Users">
+		UPDATE
+			SALE.SHIP_PROD_USER_INFO
+		SET
+			CHK_PWD = '0'
+		WHERE
+	  		ID = #{ID}
+	</update>
+	
+	<update id="updateLoginCount">
+		UPDATE
+			SALE.SHIP_PROD_USER_INFO
+		SET
+			CHK_PWD = CHK_PWD + 1
+		WHERE
+			ID = #{ID}
+	</update>
+	
+	<delete id="deleteUser" parameterType="com.asia.ProductShipment.users.Users">
+		DELETE FROM 
+			SALE.SHIP_PROD_USER_INFO
+		WHERE
+		 	ID = #{ID}
+	</delete>
+	
+</mapper>

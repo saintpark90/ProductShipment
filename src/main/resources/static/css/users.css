@@ -1,0 +1,48 @@
+@charset "EUC-KR";
+body {
+  font-size: .875rem;
+  width: 1280px;
+  	max-width: none !important;
+}
+.container-fluid{
+	width: 1120px;
+  	max-width: none !important;
+}
+.usersTable_tr td{
+	cursor: auto;
+}
+.refreshButton{
+	width: 20px;
+	height: 20px;
+	cursor: pointer;
+}
+.form-control {
+	font-size: 12px;
+	padding: 0px 5px;
+	height: 28px;
+}
+
+#userInsertTable th, td{
+	text-align: center;
+	cursor: auto;
+}
+.sidebar .nav-link2 {
+	font-size:18px;
+  font-weight: 500;
+  color: #333;
+  padding: 12px 16px;
+}
+
+.sidebar .nav-link2 .feather {
+  margin-right: 4px;
+  color: #999;
+}
+
+.sidebar .nav-link2.active {
+  color: #007bff;
+}
+
+.sidebar .nav-link2:hover .feather,
+.sidebar .nav-link2.active .feather {
+  color: inherit;
+}
